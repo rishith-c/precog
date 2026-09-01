@@ -105,115 +105,114 @@ export default function Page() {
     } finally { setBusy(false); }
   }, [url, busy]);
 
+
   const cur = runs.find((r) => r.id === active) ?? null;
+
+  const SAMPLES = ["linear.app", "stripe.com", "vercel.com", "notion.so"];
 
   return (
     <>
-      <aside>
-        <div className="titlebar">
-          <div className="lights"><span className="r" /><span className="y" /><span className="g" /></div>
-        </div>
-        <div className="brand">
+      <header className="nav">
+        <span className="wm">
           <span className="mark"><Mark /></span>
           <span className="name">Precog</span>
-        </div>
-
-        <nav>
-          <button className={`navitem ${view === "run" ? "on" : ""}`} onClick={() => setView("run")}>
-            {I.run} New run <span className="tail">⏎</span>
-          </button>
-          <button className={`navitem ${view === "method" ? "on" : ""}`} onClick={() => setView("method")}>
-            {I.method} Method
-          </button>
+        </span>
+        <nav className="links">
+          <button className={`lk ${view === "run" ? "on" : ""}`} onClick={() => setView("run")}>Analyse</button>
+          <button className={`lk ${view === "method" ? "on" : ""}`} onClick={() => setView("method")}>Method</button>
         </nav>
-
-        <div className="scroller">
-          <div className="sect">Runs</div>
-          {runs.length === 0 && (
-            <div style={{ padding: "4px 9px", fontSize: 13, color: "var(--ink-4)" }}>Nothing yet.</div>
+        <div className="rt">
+          {cur && view === "run" && (
+            <span className={`tag ${cur.fc.grade === "strong" ? "pass" : cur.fc.grade === "weak" ? "fail" : "warn"}`}>
+              {cur.fc.grade}
+            </span>
           )}
-          {runs.map((r) => (
-            <button key={r.id} className={`thread ${r.id === active && view === "run" ? "active" : ""}`}
-              onClick={() => { setActive(r.id); setView("run"); }}>
-              <span className="txt">{r.host}</span>
-              <span className="sc">{r.fc.ctr.toFixed(1)}%</span>
-            </button>
-          ))}
+          <a href="https://github.com/rishith-c/precog" target="_blank" rel="noreferrer">
+            <button className="ghost">GitHub</button>
+          </a>
         </div>
+      </header>
 
-        <div className="acct">
-          <span className="avatar">RC</span>
-          <span className="who">Local · no data leaves</span>
-        </div>
-      </aside>
+      <div className="wrap">
+        {view === "method" ? <Method /> : (
+          <>
+            <section className="hero">
+              <span className="kick">{I.brain} TRIBE-shaped cortical encoder</span>
+              <h1>See the click <em>before</em> you ship the page.</h1>
+              <p className="sub">
+                Precog measures the real pixels and the real copy of a landing page,
+                encodes a predicted cortical response, and forecasts click-through —
+                with every coefficient printed.
+              </p>
 
-      <main>
-        <div className="topbar">
-          <span className="title">
-            {view === "method" ? "Method" : cur ? cur.host : "New run"}
-          </span>
-          <div className="right">
-            {cur && view === "run" && (
-              <span className={`tag ${cur.fc.grade === "strong" ? "pass" : cur.fc.grade === "weak" ? "fail" : "warn"}`}>
-                {cur.fc.grade}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="page">
-          <div className="pcol">
-            {view === "method" ? <Method /> : (
-              <>
-                <h2>Neural pre-flight</h2>
-                <p className="lede">
-                  Run a page past a predicted brain before you run it past users. Precog measures the
-                  real pixels and the real copy, encodes a cortical response, and forecasts the click.
-                </p>
-
+              <div className="runbar">
                 <div className="urlbar">
                   <input ref={inputRef} value={url} placeholder="your-saas.com"
                     onChange={(e) => setUrl(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") run(); }}
                     spellCheck={false} autoCapitalize="off" autoCorrect="off" />
                   <button className="primary" onClick={run} disabled={busy || !url.trim()}>
-                    {busy ? "Running…" : "Run"}
+                    {busy ? "Running…" : "Analyse"}
                   </button>
                 </div>
+                {!cur && !busy && (
+                  <div className="samples">
+                    {SAMPLES.map((sx) => (
+                      <button className="sm" key={sx} onClick={() => setUrl(sx)}>{sx}</button>
+                    ))}
+                  </div>
+                )}
+                {runs.length > 0 && (
+                  <div className="hist">
+                    {runs.map((r) => (
+                      <button key={r.id} className={`hchip ${r.id === active ? "on" : ""}`}
+                        onClick={() => setActive(r.id)}>
+                        {r.host} <b>{r.fc.ctr.toFixed(1)}%</b>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
 
-                {(busy || err) && (
-                  <div className="card" style={{ marginTop: 14 }}>
-                    <div className="steps">
-                      {STEPS.map((s) => (
-                        <div key={s.id} className={`step ${steps[s.id]}`}>
-                          <span className="sd" />{s.label}
-                          <span className="st">
-                            {steps[s.id] === "done" && timing[s.id] != null ? `${timing[s.id]} ms` :
-                             steps[s.id] === "run" ? "…" : steps[s.id] === "fail" ? "failed" : ""}
-                          </span>
-                        </div>
-                      ))}
+            {(busy || err) && (
+              <div className="card" style={{ marginTop: 26 }}>
+                <div className="steps">
+                  {STEPS.map((sx) => (
+                    <div key={sx.id} className={`step ${steps[sx.id]}`}>
+                      <span className="sd" />{sx.label}
+                      <span className="st">
+                        {steps[sx.id] === "done" && timing[sx.id] != null ? `${timing[sx.id]} ms` :
+                         steps[sx.id] === "run" ? "…" : steps[sx.id] === "fail" ? "failed" : ""}
+                      </span>
                     </div>
-                    {err && <div className="err">{err}</div>}
-                  </div>
-                )}
-
-                {cur && !busy && <Result key={cur.id} r={cur} />}
-
-                {!cur && !busy && !err && (
-                  <div className="empty">
-                    <div className="mk"><Mark /></div>
-                    <p>
-                      Point it at a landing page. Nothing is stored, nothing is sent anywhere
-                      except the page itself — and the result shows every number it used.
-                    </p>
-                  </div>
-                )}
-              </>
+                  ))}
+                </div>
+                {err && <div className="err">{err}</div>}
+              </div>
             )}
-          </div>
-        </div>
-      </main>
+
+            {cur && !busy && <Result key={cur.id} r={cur} />}
+
+            {!cur && !busy && !err && (
+              <div className="empty">
+                <p>
+                  Nothing is stored and nothing is sent anywhere except a request to the
+                  page you name. Every number the forecast used is shown with it.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        <footer className="foot">
+          <span>Precog · neural pre-flight</span>
+          <a href="https://arxiv.org/abs/2507.22229" target="_blank" rel="noreferrer">TRIBE paper</a>
+          <a href="https://ai.meta.com/blog/tribe-v2-brain-predictive-foundation-model/" target="_blank" rel="noreferrer">TRIBE v2</a>
+          <button className="lk" onClick={() => setView("method")} style={{ padding: 0, height: "auto", background: "none" }}>Method</button>
+          <span className="sp">TRIBE v2 © Meta, CC-BY-NC 4.0</span>
+        </footer>
+      </div>
     </>
   );
 }
@@ -230,7 +229,7 @@ function Result({ r }: { r: Run }) {
     <div className="viewin" style={{ marginTop: 18 }}>
       {/* ---------------- HERO ---------------- */}
       <div className="card">
-        <div className="hero">
+        <div className="rhero">
           <div className="lft">
             <div className="bignum">{fc.ctr.toFixed(2)}<span className="u">%</span></div>
             <div className="bigcap">predicted CTA click-through</div>
