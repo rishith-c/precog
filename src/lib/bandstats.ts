@@ -70,3 +70,31 @@ export function computeBands(rgba: Uint8Array | Uint8ClampedArray, w: number, h:
   }
   return bands;
 }
+
+/* ------------------------------------------------------------------
+   Capture quality gate.
+
+   Every number Precog reports rests on these bands. If the renderer
+   handed back a near-uniform frame — a nav bar over dead space, a
+   consent wall, a failed paint — the statistics are noise and the
+   forecast built on them is worthless. An instrument has to know when
+   its own sensor failed, so this is checked before anything is encoded.
+   ------------------------------------------------------------------ */
+export interface CaptureQuality { ok: boolean; informative: number; reason?: string }
+
+export function captureQuality(bands: Band[]): CaptureQuality {
+  if (!bands.length) return { ok: false, informative: 0, reason: "no bands were measured" };
+
+  // A band carries information if it has either real luminance structure or
+  // real edge energy. Flat colour in both is an empty region.
+  const live = bands.filter((b) => b.contrast > 0.035 || b.edge > 0.05).length;
+  const informative = live / bands.length;
+
+  if (informative < 0.34) {
+    return {
+      ok: false, informative,
+      reason: `only ${live} of ${bands.length} bands contained any visual structure — the renderer returned a near-empty frame, so there is nothing to measure`,
+    };
+  }
+  return { ok: true, informative };
+}

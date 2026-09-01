@@ -103,17 +103,17 @@ export function encode(bands: Band[], page: PageFeatures): Encoding {
     const stamina = Math.exp(-t / 15);
 
     // ---- VISUAL: contrast + edge energy, penalised by clutter ----------
-    const v = clamp(0.44 * b.contrast * 3.1 + 0.36 * b.edge * 1.5 + 0.20 * b.chroma * 1.8) *
+    const v = clamp(0.44 * b.contrast * 2.5 + 0.36 * b.edge * 1.2 + 0.20 * b.chroma * 1.5) *
               (1 - 0.30 * clamp((b.edge - 0.62) * 2));
     raw.visual.push(clamp(v));
 
     // ---- ATTENTION: local pop-out, divided by global competition -------
-    const popout = clamp(b.contrast * 2.9 + b.edge * 0.85) * (0.52 + 0.48 * b.emptiness);
+    const popout = clamp(b.contrast * 2.4 + b.edge * 0.7) * (0.52 + 0.48 * b.emptiness);
     raw.attention.push(clamp(popout * competition * (0.62 + 0.38 * stamina) + 0.18 * novelty));
 
     // ---- LANGUAGE: text density in view x lexical difficulty -----------
-    const textish = clamp(b.edge * 1.7 * (1 - b.chroma * 0.6));
-    raw.language.push(clamp(textish * (0.55 + 0.65 * wordLoad) * (0.7 + 0.6 * lexComplexity)));
+    const textish = clamp(b.edge * 1.15 * (1 - b.chroma * 0.6));
+    raw.language.push(clamp(textish * (0.52 + 0.55 * wordLoad) * (0.72 + 0.45 * lexComplexity)));
 
     // ---- REWARD: value cues, weighted to where they are read -----------
     const readWeight = Math.exp(-Math.pow((idx / (bands.length - 1) - 0.18) / 0.42, 2));
@@ -170,7 +170,7 @@ export function encode(bands: Band[], page: PageFeatures): Encoding {
 
   // ---- per-band attention, for the heat overlay -----------------------
   const bandAttention = bands.map((b, i) => {
-    const popout = clamp(b.contrast * 2.9 + b.edge * 0.85) * (0.52 + 0.48 * b.emptiness);
+    const popout = clamp(b.contrast * 2.4 + b.edge * 0.7) * (0.52 + 0.48 * b.emptiness);
     const depth = Math.exp(-Math.pow(i / Math.max(1, bands.length - 1) / 0.62, 1.9));
     return clamp(popout * competition * depth * 1.35);
   });

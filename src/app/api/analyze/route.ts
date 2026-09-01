@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { extractPage } from "@/lib/page";
 import { decodePng } from "@/lib/png";
-import { computeBands } from "@/lib/bandstats";
+import { computeBands, captureQuality } from "@/lib/bandstats";
 import { encode } from "@/lib/encoder";
 import { forecast, PRIORS } from "@/lib/forecast";
 
@@ -33,6 +33,9 @@ export async function GET(req: NextRequest) {
     const { data, width, height } = decodePng(png);
     const bands = computeBands(data, width, height, 12);
 
+    const q = captureQuality(bands);
+    if (!q.ok) return NextResponse.json({ error: `capture is not measurable: ${q.reason}` }, { status: 422 });
+
     const enc = encode(bands, page);
     const fc = forecast(enc, page);
 
@@ -62,7 +65,7 @@ export async function GET(req: NextRequest) {
         urgencyWords: page.urgencyWords, frictionWords: page.frictionWords,
         jargonWords: page.jargonWords, hasPricing: page.hasPricing,
       },
-      capture: { width, height, bands: bands.length },
+      capture: { width, height, bands: bands.length, informative: Number(q.informative.toFixed(2)) },
       ms: Date.now() - t0,
     });
   } catch (e) {

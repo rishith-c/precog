@@ -70,15 +70,32 @@ and re-runs the same equation.
 
 ## Validation
 
-Discrimination check across two structurally opposite pages:
+Discrimination check across five structurally different pages:
 
-| page | CTR | reward | visual | language | reading |
-|---|---|---|---|---|---|
-| `linear.app` | 6.64% | 77 | 26 | 31 | marketing copy, strong value cues |
-| `news.ycombinator.com` | 3.11% | 10 | 47 | 48 | zero value cues, text-dense |
+| page | CTR | vis | att | lang | rew | sal | mem |
+|---|---|---|---|---|---|---|---|
+| `linear.app` | 6.43% | 48 | 51 | 62 | 73 | 33 | 50 |
+| `vercel.com` | 4.35% | 39 | 42 | 33 | 36 | 32 | 34 |
+| `stripe.com` | 4.33% | 60 | 41 | 64 | 57 | 41 | 36 |
+| `cursor.com` | 3.53% | 33 | 27 | 40 | 64 | 53 | 31 |
+| `news.ycombinator.com` | 3.11% | 41 | 31 | 36 | 10 | 22 | 28 |
 
-The model separates them for the right reasons: HN has no marketing copy (reward 10)
-and is text-dense (visual 47, language 48).
+The model separates them for the right reasons. HN has no marketing copy at all
+(reward 10). Cursor has strong value cues (reward 64) but pays for them in
+friction (salience 53 — "Request a demo", "Contact sales"). Linear wins on
+attention held in a sparse layout rather than on volume.
+
+### The capture has to be real
+
+An earlier build rendered pages through a lightweight screenshot service that
+returned **nav-only frames** on JS-heavy sites — `linear.app` came back 99.6%
+black. Every statistic downstream was noise, and the tool reported a confident
+number anyway. That is the worst failure mode an instrument can have.
+
+Two fixes: captures now go through real headless Chrome waiting on
+`networkidle2`, and `captureQuality()` in [`bandstats.ts`](src/lib/bandstats.ts)
+**refuses to forecast** when fewer than a third of bands carry visual structure.
+A nav-only frame scores `0.08` and is rejected rather than analysed.
 
 ## Run it
 
