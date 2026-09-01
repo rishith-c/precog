@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev -p 3141",
     "build": "next build",
-    "start": "next start -p 3141"
+    "start": "next start -p 3141",
+    "preflight": "node scripts/preflight.mjs"
   },
   "dependencies": {
     "next": "16.2.6",
