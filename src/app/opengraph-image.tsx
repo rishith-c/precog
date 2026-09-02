@@ -1,12 +1,14 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+/* nodejs, not edge: on this Next build the edge variant returned a 200 with a
+   zero-byte body in production. ImageResponse renders fine on nodejs. */
+export const runtime = "nodejs";
 export const alt = "Precog — see the click before you ship the page";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/* Monochrome, like the site. The serif here is the system's — the edge
-   runtime cannot load Instrument Serif without shipping the font file. */
+/* Monochrome, like the site. The serif is the system's; shipping Instrument
+   Serif here would mean bundling the font file for one image. */
 export default function OG() {
   return new ImageResponse(
     (
