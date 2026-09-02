@@ -17,12 +17,12 @@ export default function OG() {
         display: "flex", flexDirection: "column", justifyContent: "space-between",
         padding: 72, fontFamily: "Georgia, serif",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 28 }}>
-          Precog<span style={{ fontSize: 14, fontFamily: "monospace", marginTop: -14 }}>®</span>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 4, fontSize: 28 }}>
+          <span>Precog</span><span style={{ fontSize: 14, fontFamily: "monospace" }}>®</span>
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ fontSize: 96, lineHeight: 0.98, letterSpacing: -3 }}>
-            See the click <span style={{ fontStyle: "italic" }}>before</span>
+          <div style={{ display: "flex", gap: 22, fontSize: 96, lineHeight: 0.98, letterSpacing: -3 }}>
+            <span>See the click</span><span style={{ fontStyle: "italic" }}>before</span>
           </div>
           <div style={{ fontSize: 96, lineHeight: 0.98, letterSpacing: -3 }}>you ship the page.</div>
         </div>
