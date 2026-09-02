@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /* Precog CLI — neural pre-flight for a landing page.
- *   node scripts/preflight.mjs <url> [--json] [--host https://precog-tau.vercel.app]
+ *   PRECOG_KEY=pk_… node scripts/preflight.mjs <url> [--json] [--host …]
  * Exit code is 0 for a strong/workable page and 1 for a weak one, so this can
- * gate a deploy the same way a test suite does. */
+ * gate a deploy the same way a test suite does. The run lands in your account
+ * and counts against the same quota as one made in the browser. */
 
 const args = process.argv.slice(2);
 const flag = (n, d) => { const i = args.indexOf(n); return i === -1 ? d : args[i + 1]; };
@@ -10,12 +11,20 @@ const target = args.find((a) => !a.startsWith("--") && args[args.indexOf(a) - 1]
 const host = flag("--host", process.env.PRECOG_HOST ?? "https://precog-tau.vercel.app");
 const asJson = args.includes("--json");
 
+const key = flag("--key", process.env.PRECOG_KEY);
+
 if (!target) {
-  console.error("usage: preflight <url> [--json] [--host <origin>]");
+  console.error("usage: preflight <url> [--json] [--host <origin>] [--key pk_…]");
+  process.exit(2);
+}
+if (!key) {
+  console.error("precog: set PRECOG_KEY, or pass --key. Make one under Settings in the app.");
   process.exit(2);
 }
 
-const res = await fetch(`${host}/api/analyze?url=${encodeURIComponent(target)}`);
+const res = await fetch(`${host}/api/v1/analyze?url=${encodeURIComponent(target)}`, {
+  headers: { authorization: `Bearer ${key}` },
+});
 const r = await res.json();
 if (!res.ok) { console.error(`precog: ${r.error ?? res.status}`); process.exit(2); }
 
@@ -33,5 +42,5 @@ r.fixes.forEach((f, i) => {
 });
 console.log(`\n  derivation`);
 r.derivation.forEach((d) => console.log(`     ${d}`));
-console.log(`\n  encoder: ${r.encoder}   ${r.ms} ms\n`);
+console.log(`\n  encoder: ${r.encoder}   ${r.ms} ms   quota ${r.quota.used}/${r.quota.limit}\n`);
 process.exit(r.grade === "weak" ? 1 : 0);
