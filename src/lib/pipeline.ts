@@ -1,7 +1,7 @@
 import "server-only";
 import { extractPage } from "./page";
 import { decodePng } from "./png";
-import { computeBands, captureQuality } from "./bandstats";
+import { measure, captureQuality } from "./bandstats";
 import { encode } from "./encoder";
 import { forecast } from "./forecast";
 import { capture, normaliseUrl } from "./capture";
@@ -19,6 +19,8 @@ export interface RunResult {
   png: Uint8Array;
   width: number;
   height: number;
+  /** share of bands carrying visual structure — the capture-quality figure */
+  informative: number;
   ms: number;
 }
 
@@ -44,17 +46,17 @@ export async function runAnalysis(target: string): Promise<RunResult> {
   const png = shotRes.value;
 
   const { data, width, height } = decodePng(Buffer.from(png));
-  const bands = computeBands(data, width, height, 12);
+  const { bands, focus } = measure(data, width, height, 12);
 
   /* A frame with no structure in it is not a cheap forecast, it is a wrong
      one. Refuse rather than analyse noise. */
   const q = captureQuality(bands);
   if (!q.ok) throw new RunError(`The capture is not measurable — ${q.reason}.`, 422);
 
-  const enc = encode(bands, page);
+  const enc = encode(bands, page, focus);
   const fc = forecast(enc, page);
 
-  return { page, bands, enc, fc, png, width, height, ms: Date.now() - t0 };
+  return { page, bands, enc, fc, png, width, height, informative: q.informative, ms: Date.now() - t0 };
 }
 
 export function hostOf(url: string) {

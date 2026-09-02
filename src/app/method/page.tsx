@@ -60,6 +60,17 @@ export default function MethodPage() {
               driven by the measured features above through stated coefficients.
             </p>
             <p>
+              <b>Is TRIBE enough?</b> No. It predicts fMRI, not behaviour, and the published
+              neural-to-outcome effect sizes are modest. It was trained on people passively
+              watching films at one sample a second; a landing page is scanned by someone with
+              a goal, at saccade speed. So the attention network here is not fMRI-shaped at all —
+              it is a bottom-up <b>saliency map</b> in the Itti–Koch–Niebur form (centre–surround
+              on intensity, colour opponency and orientation) under a top-and-left reading prior
+              from web eye-tracking, divided by competition. That is the part of this model with
+              the best-replicated grounding, and it is the part that decides whether the action
+              is seen at all.
+            </p>
+            <p>
               It models a reader who scrolls rather than teleports, whose attention is a
               depleting resource, and for whom salient regions <b>compete</b> rather than sum.
               Response is convolved with a gamma haemodynamic kernel peaking near six seconds.

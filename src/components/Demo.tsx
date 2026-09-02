@@ -70,7 +70,7 @@ export default function Demo({ signedIn }: { signedIn: boolean }) {
       if (pageRes.status === "rejected")
         throw new Error(`Could not read ${target} — ${pageRes.reason?.message ?? "unreachable"}.`);
 
-      const { bands } = visionRes.value;
+      const { bands, focus } = visionRes.value;
       const page = pageRes.value;
 
       const q = captureQuality(bands);
@@ -81,7 +81,7 @@ export default function Demo({ signedIn }: { signedIn: boolean }) {
       setTiming((t) => ({ ...t, capture: tCap, read: page.fetchMs }));
 
       const te = performance.now();
-      const enc = encode(bands, page);
+      const enc = encode(bands, page, focus);
       setSteps((s) => ({ ...s, encode: "done", forecast: "run" }));
       setTiming((t) => ({ ...t, encode: Math.round(performance.now() - te) }));
 

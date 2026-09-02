@@ -1,29 +1,43 @@
 /**
+ * Precog pre-flight
+ *
+ * Will anyone click this page? Renders the landing page in real Chrome,
+ * measures its pixels and copy, encodes a six-network cortical response and
+ * forecasts CTA click-through — then ranks what to change, with every
+ * coefficient printed. No account, no credentials; one page in, one report out.
+ *
+ * @rote-frontmatter
  * ---
  * name: precog-preflight
- * version: 0.1.0
- * description: >-
- *   Neural pre-flight for a landing page. Renders the page in real Chrome,
- *   measures its pixels and copy, encodes a six-network cortical response and
- *   forecasts CTA click-through — then ranks what to change, with every
- *   coefficient printed. No account, no credentials; one page in, one report
- *   out. Exit is non-zero when the page grades weak, so it can gate a deploy.
- * author: rishith-c
+ * description: "Neural pre-flight for a landing page: renders it in real Chrome, measures pixels and copy, forecasts CTA click-through with every coefficient printed, and ranks what to change. Exits non-zero on a weak grade so it can gate a deploy."
+ * provenance:
+ *   author: Rishith Chennupati <rishithchennupati@gmail.com>
+ * metadata:
+ *   rote_version: 0.78.0
+ *   status: draft
+ *   kind: atomic
+ *   flow_type: sequential
+ *   execution_model: steps_with_presentation
+ *   format: typescript
+ *   requires_endpoints: []
+ *   requires_sessions: false
+ *   discoverability:
+ *     tags:
+ *     - precog
+ *     - landing-page
+ *     - ctr
+ *     - neuroscience
+ *     - pre-flight
  * parameters:
- *   url:
- *     type: string
- *     required: true
- *     description: The landing page to pre-flight. Scheme optional.
- *     example: linear.app
- *   host:
- *     type: string
- *     required: false
- *     default: https://precog-tau.vercel.app
- *     description: Precog origin. Only change it to point at a self-hosted instance.
- * effects:
- *   declaredWrites: []
- * requirements:
- *   localTools: [curl, python3]
+ * - name: url
+ *   param_type: string
+ *   required: true
+ *   description: "Landing page to pre-flight; scheme optional (sent as the url query field of GET /api/analyze)"
+ * - name: host
+ *   param_type: string
+ *   required: false
+ *   default: "https://precog-tau.vercel.app"
+ *   description: "Precog origin; change only to point at a self-hosted instance"
  * steps:
  *   analyze:
  *     type: process.exec
@@ -31,78 +45,60 @@
  *     argv:
  *       - curl
  *       - -sS
- *       - --fail-with-body
  *       - --get
  *       - --data-urlencode
- *       - "url=$url"
- *       - "$host/api/analyze"
+ *       - url=$url
+ *       - $host/api/analyze
  *   report:
  *     type: process.exec
  *     timeout_ms: 20000
  *     depends_on: [analyze]
  *     argv:
  *       - python3
- *       - -c
- *       - |
- *         import json, sys
- *         raw = sys.argv[1]
- *         try:
- *             r = json.loads(raw)
- *         except Exception:
- *             print(json.dumps({"ok": False, "error": "precog returned no JSON", "raw": raw[:300]})); sys.exit(1)
- *         if "error" in r:
- *             # Expected absence — a page that cannot be captured is a labelled
- *             # unknown, not a crash; the run stays inspectable.
- *             print(json.dumps({"ok": True, "warning": r["error"], "grade": "unmeasurable"})); sys.exit(0)
- *         bar = lambda v: "█" * round(v / 5) + "·" * (20 - round(v / 5))
- *         lines = [
- *             f"{r['url']}",
- *             f"{r['ctr']}%  predicted CTA click-through   [{r['interval'][0]}% – {r['interval'][1]}%]   {r['grade'].upper()}",
- *             "",
- *         ] + [f"{k:<10} {bar(v)} {v:>3}" for k, v in r["networks"]["peak"].items()] + ["", "what to change"]
- *         for i, f in enumerate(r["fixes"], 1):
- *             lines.append(f"{i}. {f['title']}   +{f['liftPct']}%")
- *         lines += ["", "derivation"] + ["   " + d for d in r["derivation"]]
- *         lines += ["", f"encoder: {r['encoder']}   {r['ms']} ms"]
- *         print(json.dumps({
- *             "ok": True, "url": r["url"], "ctr": r["ctr"], "interval": r["interval"],
- *             "grade": r["grade"], "signals": r["signals"], "peak": r["networks"]["peak"],
- *             "fixes": r["fixes"], "derivation": r["derivation"], "encoder": r["encoder"],
- *             "text": "\n".join(lines),
- *         }))
- *         # Hard fault only on a weak grade: the page ran, the verdict is the failure.
- *         sys.exit(1 if r["grade"] == "weak" else 0)
+ *       - "@resource{report.py}"
  *       - "@analyze{$.stdout.text}"
  * ---
  */
 
-/* Presentation. Three views, one canonical result: `result` is the JSON the
-   report step printed, `human` is its `text` field, `summary` is one line.
-   No fact is dropped from a view that claims to be complete. */
+// Presentation plane: deprivileged; imports ONLY the presentation SDK; owns no effects.
+const { FlowOutput, isProcessExecBody, loadPresentationContext, stepName } =
+  await import("__ROTE_PRESENTATION_SDK__");
+
+const out = new FlowOutput();
+const ctx = await loadPresentationContext();
+
+const url = ctx.params.url;
+if (typeof url !== "string" || url.length === 0) throw new Error("url parameter is required");
 
 type Report = {
-  ok: boolean; warning?: string; error?: string;
+  ok: boolean; available?: boolean; warning?: string;
   url?: string; ctr?: number; interval?: [number, number]; grade?: string;
-  signals?: Record<string, number>; peak?: Record<string, number>;
+  signals?: Record<string, number>; peak?: Record<string, number>; focus?: number;
   fixes?: { title: string; detail: string; liftPct: number; network: string }[];
   derivation?: string[]; encoder?: string; text?: string;
 };
 
-export function result(steps: { report: { stdout: { text: string } } }): Report {
-  try { return JSON.parse(steps.report.stdout.text); }
-  catch { return { ok: false, error: "report step produced no JSON" }; }
-}
+// The report step owns the verdict: a weak page is a nonzero exit by design.
+const rep = ctx.requireAvailable(stepName("report"));
+if (!isProcessExecBody(rep.body)) throw new Error("report did not record a process.exec observation");
+const stdout = rep.body.stdout?.text ?? "";
+let r: Report;
+try { r = JSON.parse(stdout); }
+catch { throw new Error(`report produced no JSON: ${rep.body.stderr?.text ?? "no stderr captured"}`); }
 
-export function summary(steps: Parameters<typeof result>[0]): string {
-  const r = result(steps);
-  if (!r.ok) return `precog: ${r.error}`;
-  if (r.warning) return `precog: ${r.url ?? "page"} could not be measured — ${r.warning}`;
-  return `${r.url} → ${r.ctr}% (${r.grade}); top fix: ${r.fixes?.[0]?.title ?? "none"}`;
-}
+const exit = rep.body.status.exit;
+const weak = exit.kind === "code" && exit.code === 1 && r.grade === "weak";
 
-export function human(steps: Parameters<typeof result>[0]): string {
-  const r = result(steps);
-  if (!r.ok) return `precog failed: ${r.error}`;
-  if (r.warning) return `Could not measure the page.\n${r.warning}\n\nA frame with no structure in it is refused, not analysed.`;
-  return r.text ?? summary(steps);
+if (r.available === false) {
+  out.human(`Could not measure ${url}.\n${r.warning}\n\nA frame with no visual structure is refused, not analysed.`);
+  out.summary(`precog: ${url} could not be measured — ${r.warning}`);
+  out.result({ run_id: ctx.run.run_id, url, available: false, warning: r.warning });
+} else {
+  out.human(r.text ?? "");
+  out.summary(`${r.url} → ${r.ctr}% (${r.grade}${weak ? " — gate failed" : ""}); top fix: ${r.fixes?.[0]?.title ?? "none"}`);
+  out.result({
+    run_id: ctx.run.run_id, url: r.url, ctr: r.ctr, interval: r.interval, grade: r.grade,
+    gate_passed: !weak, signals: r.signals, peak: r.peak, focus: r.focus,
+    fixes: r.fixes, derivation: r.derivation, encoder: r.encoder,
+  });
 }

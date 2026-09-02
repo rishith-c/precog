@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
   if (!target) return NextResponse.json({ error: "missing url" }, { status: 400, headers: limitHeaders(v) });
 
   try {
-    const { page, bands, enc, fc, width, height, ms } = await runAnalysis(target);
+    const { page, bands, enc, fc, width, height, informative, ms } = await runAnalysis(target);
     return NextResponse.json(
       {
         url: page.finalUrl,
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
           scrollDepth: Math.round(fc.scrollDepth),
           recall: Number(fc.recall.toFixed(3)),
         },
-        networks: { peak: enc.peak, sustained: enc.mean },
+        networks: { peak: enc.peak, sustained: enc.mean, focus: Number(enc.focus.toFixed(3)), frames: enc.frames.map((f) => f.values) },
         fixes: fc.fixes,
         derivation: fc.derivation,
         priors: PRIORS,
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
           urgencyWords: page.urgencyWords, frictionWords: page.frictionWords,
           jargonWords: page.jargonWords, hasPricing: page.hasPricing,
         },
-        capture: { width, height, bands: bands.length },
+        capture: { width, height, bands: bands.length, informative: Number(informative.toFixed(2)) },
         saved: false,
         ms,
       },

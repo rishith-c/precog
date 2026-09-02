@@ -27,6 +27,12 @@ export const PRIORS = {
   bMemory:   0.35,    // encoding strength -> return + delayed click
   bLanguage: -0.55,   // reading cost suppresses action
   bFriction: -1.20,   // insula-tracked hesitation
+  /* Each term is centred on the median of a six-page reference panel
+     (linear.app, stripe.com, apple.com, vercel.com, news.ycombinator.com,
+     cursor.com — tests/validate.mjs), measured 2026-09-02. A page at the
+     panel median on every term forecasts the base rate; the panel is the
+     scale, and it is printed with every derivation. */
+  centre: { notice: 0.28, reward: 0.44, memory: 0.35, language: 0.23, friction: 0.33 },
 };
 
 const logit = (p: number) => Math.log(p / (1 - p));
@@ -34,20 +40,28 @@ const invlogit = (x: number) => 1 / (1 + Math.exp(-x));
 const clamp = (v: number, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
 
 function ctrFrom(n: { notice: number; reward: number; memory: number; language: number; friction: number }) {
+  const c = PRIORS.centre;
   const z =
     logit(PRIORS.base) +
-    PRIORS.bNotice   * (n.notice   - 0.5) +
-    PRIORS.bReward   * (n.reward   - 0.5) +
-    PRIORS.bMemory   * (n.memory   - 0.5) +
-    PRIORS.bLanguage * (n.language - 0.5) +
-    PRIORS.bFriction * (n.friction - 0.5);
+    PRIORS.bNotice   * (n.notice   - c.notice) +
+    PRIORS.bReward   * (n.reward   - c.reward) +
+    PRIORS.bMemory   * (n.memory   - c.memory) +
+    PRIORS.bLanguage * (n.language - c.language) +
+    PRIORS.bFriction * (n.friction - c.friction);
   return invlogit(z);
 }
 
 export function forecast(enc: Encoding, page: PageFeatures): Forecast {
   // Peak response is the decision-relevant statistic for reward and salience;
   // sustained mean is what matters for reading cost and encoding.
-  const notice   = clamp(enc.peak.attention / 100);
+  // Noticeability is the attention peak blended with how concentrated the
+  // page's saliency is: a page can have a bright spot and still scatter the
+  // eye everywhere else, and the scatter is what loses the click.
+  // A page with no action target has nothing to notice: the attention it
+  // holds lands on content, not on a click. Half the gate, do not zero it —
+  // a reader can still click a nav link — and say so in the derivation.
+  const targetTerm = page.ctaCount === 0 ? 0.5 : page.ctaCount <= 2 ? 1.0 : Math.max(0.72, 1 - 0.035 * (page.ctaCount - 2));
+  const notice   = clamp((0.62 * (enc.peak.attention / 100) + 0.38 * enc.focus) * targetTerm);
   const reward   = clamp(enc.peak.reward / 100);
   const memory   = clamp(enc.mean.memory / 100);
   const language = clamp(enc.mean.language / 100);
@@ -122,14 +136,16 @@ export function forecast(enc: Encoding, page: PageFeatures): Forecast {
 
   const derivation = [
     `base            = ${PRIORS.base.toFixed(3)}                 logit = ${logit(PRIORS.base).toFixed(3)}`,
-    `notice   ${notice.toFixed(3)}  x ${PRIORS.bNotice.toFixed(2).padStart(5)}  ->  ${(PRIORS.bNotice * (notice - 0.5)).toFixed(4).padStart(8)}`,
-    `reward   ${reward.toFixed(3)}  x ${PRIORS.bReward.toFixed(2).padStart(5)}  ->  ${(PRIORS.bReward * (reward - 0.5)).toFixed(4).padStart(8)}`,
-    `memory   ${memory.toFixed(3)}  x ${PRIORS.bMemory.toFixed(2).padStart(5)}  ->  ${(PRIORS.bMemory * (memory - 0.5)).toFixed(4).padStart(8)}`,
-    `language ${language.toFixed(3)}  x ${PRIORS.bLanguage.toFixed(2).padStart(5)}  ->  ${(PRIORS.bLanguage * (language - 0.5)).toFixed(4).padStart(8)}`,
-    `friction ${friction.toFixed(3)}  x ${PRIORS.bFriction.toFixed(2).padStart(5)}  ->  ${(PRIORS.bFriction * (friction - 0.5)).toFixed(4).padStart(8)}`,
+    `terms centred on the six-page reference panel medians (tests/validate.mjs)`,
+    `notice   ${notice.toFixed(3)} -${PRIORS.centre.notice.toFixed(2)}  x ${PRIORS.bNotice.toFixed(2).padStart(5)}  ->  ${(PRIORS.bNotice * (notice - PRIORS.centre.notice)).toFixed(4).padStart(8)}`,
+    `reward   ${reward.toFixed(3)} -${PRIORS.centre.reward.toFixed(2)}  x ${PRIORS.bReward.toFixed(2).padStart(5)}  ->  ${(PRIORS.bReward * (reward - PRIORS.centre.reward)).toFixed(4).padStart(8)}`,
+    `memory   ${memory.toFixed(3)} -${PRIORS.centre.memory.toFixed(2)}  x ${PRIORS.bMemory.toFixed(2).padStart(5)}  ->  ${(PRIORS.bMemory * (memory - PRIORS.centre.memory)).toFixed(4).padStart(8)}`,
+    `language ${language.toFixed(3)} -${PRIORS.centre.language.toFixed(2)}  x ${PRIORS.bLanguage.toFixed(2).padStart(5)}  ->  ${(PRIORS.bLanguage * (language - PRIORS.centre.language)).toFixed(4).padStart(8)}`,
+    `friction ${friction.toFixed(3)} -${PRIORS.centre.friction.toFixed(2)}  x ${PRIORS.bFriction.toFixed(2).padStart(5)}  ->  ${(PRIORS.bFriction * (friction - PRIORS.centre.friction)).toFixed(4).padStart(8)}`,
     `                                        ---------`,
     `z = ${logit(p).toFixed(4)}    ctr = invlogit(z) = ${ctr.toFixed(2)}%`,
     `interval  +/- ${spread.toFixed(3)} logit  (${resolved}/6 stimulus signals resolved)`,
+    `targets  ${page.ctaCount} action target${page.ctaCount === 1 ? "" : "s"} found  ->  notice x ${targetTerm.toFixed(2)}`,
   ];
 
   return {

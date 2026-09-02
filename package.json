@@ -6,7 +6,8 @@
     "dev": "next dev -p 3141",
     "build": "next build",
     "start": "next start -p 3141",
-    "preflight": "node scripts/preflight.mjs"
+    "preflight": "node scripts/preflight.mjs",
+    "validate": "node tests/validate.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

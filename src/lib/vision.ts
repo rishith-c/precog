@@ -1,10 +1,10 @@
 import { Band } from "./types";
-import { computeBands } from "./bandstats";
+import { measure } from "./bandstats";
 
 /* Browser side: decode the captured page onto a canvas and hand the raw RGBA
    to the shared band-statistics routine. Same maths as the server path. */
 
-export async function analyzeImage(src: string, bandCount = 12): Promise<{ bands: Band[]; w: number; h: number }> {
+export async function analyzeImage(src: string, bandCount = 12): Promise<{ bands: Band[]; focus: number; w: number; h: number }> {
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.src = src;
@@ -21,5 +21,6 @@ export async function analyzeImage(src: string, bandCount = 12): Promise<{ bands
   ctx.drawImage(img, 0, 0, w, h);
   const { data } = ctx.getImageData(0, 0, w, h);
 
-  return { bands: computeBands(data, w, h, bandCount), w, h };
+  const m = measure(data, w, h, bandCount);
+  return { bands: m.bands, focus: m.focus, w, h };
 }

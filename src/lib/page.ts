@@ -8,6 +8,7 @@ const PROOF = /\b(trusted by|customers|users|companies|teams|rated|reviews?|test
 const URGENCY = /\b(now|today|limited|ends|hurry|last chance|only \d+|deadline|expires|don't miss|act fast)\b/gi;
 const FRICTION = /\b(contact sales|book a demo|request access|talk to (?:us|sales)|schedule a call|fill out|apply|waitlist|enterprise only|minimum|per seat|annual contract)\b/gi;
 const JARGON = /\b(synerg\w+|leverag\w+|holistic|paradigm|end.to.end|best.in.class|seamless\w*|robust|scalab\w+|cutting.edge|next.generation|revolutionary|disrupt\w+|innovat\w+ solution|orchestrat\w+|framework|platform.agnostic)\b/gi;
+const OFFER = /\b(buy|shop|order now|pre-?order|add to (?:cart|bag)|from \$\s?\d|starting at|starts at|\$\s?\d[\d,.]*(?:\/mo|\s?per month)?|free shipping|trade[- ]in|financing|new\b|now available|available now|in stock|get it|try it|start (?:free|now)|learn more)\b/gi;
 const PRICING = /(\$\s?\d|\bpricing\b|\bper month\b|\/mo\b|\bfree tier\b|\bstarts at\b|\bplans?\b)/i;
 const CTA_TEXT = /\b(get started|start (?:free|now|building)|try (?:it )?free|sign up|book a demo|request a demo|contact sales|join|download|buy|subscribe|create account|start trial|get access|learn more|see pricing)\b/i;
 
@@ -74,6 +75,7 @@ export async function extractPage(rawUrl: string): Promise<PageFeatures> {
     frictionWords: count(text, FRICTION),
     jargonWords: count(text, JARGON),
     hasPricing: PRICING.test(text),
+    offerWords: count(text, OFFER),
     fetchMs: Date.now() - t0,
   };
 }

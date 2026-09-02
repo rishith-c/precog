@@ -24,6 +24,12 @@ export interface Band {
   salientCells: number;
   /** fraction of cells that are near-uniform (whitespace) */
   emptiness: number;
+  /** mean bottom-up saliency in the band (Itti–Koch centre-surround), 0..1 */
+  saliency: number;
+  /** how concentrated that saliency is: peak / mean, 1 = flat, >3 = one thing pops */
+  salConc: number;
+  /** fraction of cells that read as photographic (chroma-rich, smooth, few edges) */
+  photo: number;
 }
 
 export interface PageFeatures {
@@ -50,6 +56,8 @@ export interface PageFeatures {
   frictionWords: number;
   jargonWords: number;
   hasPricing: boolean;
+  /** offer and product cues: buy, shop, from $, new, pre-order, trade in … */
+  offerWords: number;
   fetchMs: number;
 }
 
@@ -66,6 +74,8 @@ export interface Encoding {
   frames: NetworkFrame[];
   /** per-band attention weight 0..1, indexed like bands */
   bandAttention: number[];
+  /** 1 − normalised entropy of the page's saliency map: 1 = one focus, 0 = everything shouts */
+  focus: number;
   source: "tribe-v2" | "precog-encoder";
   notes: string[];
 }
