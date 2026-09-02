@@ -9,6 +9,12 @@ Done when: a CTR **with an interval**, six network peaks, at least one ranked fi
 with a derived lift, and the full derivation. A number without its derivation is
 not done.
 
+## Published
+
+Public, in the Community namespace: `https://play.modiqo.ai/rishith-c/precog-preflight@0.1.0`
+
+    rote play run https://play.modiqo.ai/rishith-c/precog-preflight@0.1.0 url=your-saas.com
+
 ## Verify, then publish (needs `rote`, signed in)
 
     rote play lint play/precog-preflight/main.ts

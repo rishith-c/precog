@@ -67,6 +67,7 @@ inspectability is the product, not a garnish.
 ## One-shot invocation
 
 ```bash
+rote play run https://play.modiqo.ai/rishith-c/precog-preflight@0.1.0 url=https://your-saas.com   # the published Play
 npx --yes . preflight https://your-saas.com          # from the repo
 node scripts/preflight.mjs your-saas.com --json      # machine-readable
 ```

@@ -179,5 +179,9 @@ OG image, health.
 ## The Play
 
 [`play/precog-preflight/`](play/precog-preflight/) is the same job as a Rote
-Play: two `process.exec` steps, no credentials, no declared writes. Its README
-has the lint / run / publish commands.
+Play: two `process.exec` steps, no credentials, no declared writes. Published
+public as `rishith-c/precog-preflight@0.1.0`:
+
+```bash
+rote play run https://play.modiqo.ai/rishith-c/precog-preflight@0.1.0 url=your-saas.com
+```
