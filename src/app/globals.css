@@ -473,3 +473,86 @@ table.l td.up { color: var(--pass); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* ============================ 2026 LANDING GRAMMAR ============================
+   Patterns taken from this week's launches — Product Hunt top 10 and YC S26:
+   a thin top announcement bar, a badge chip above the headline, the input as
+   the hero action, a console panel showing real output, a mono capability row,
+   and a tabular stat strip. */
+
+.topbar-ann {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  height: 34px; padding: 0 16px;
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
+  font-size: 12.5px; color: var(--ink-2); text-align: center;
+}
+.topbar-ann b { font-weight: 600; color: var(--ink); }
+.topbar-ann .arw { color: var(--ink-4); }
+@media (max-width: 640px) { .topbar-ann { font-size: 11.5px; height: auto; padding: 7px 12px; line-height: 1.35; } }
+
+/* badge chip above the headline — the YC / Product-Hunt slot */
+.badges { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 20px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 10px;
+  border-radius: 7px; border: 1px solid var(--border-strong); background: var(--surface);
+  font-size: 12px; color: var(--ink-2);
+}
+.badge .k {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--daisy-deep);
+}
+.badge svg { width: 13px; height: 13px; color: var(--ink-3); }
+
+/* hero becomes two columns once there is room for the console */
+.herogrid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+@media (max-width: 940px) { .herogrid { grid-template-columns: 1fr; gap: 30px; } }
+
+/* console panel — real CLI output, not a mockup */
+.term {
+  border: 1px solid var(--border-strong); border-radius: 11px; overflow: hidden;
+  background: var(--surface-2); box-shadow: var(--shadow-2);
+}
+.term .tb {
+  display: flex; align-items: center; gap: 7px; padding: 8px 11px;
+  border-bottom: 1px solid var(--border); background: var(--surface-3);
+}
+.term .tb i { width: 9px; height: 9px; border-radius: 50%; background: var(--border-strong); }
+.term .tb span { margin-left: 5px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-4); }
+.term pre {
+  margin: 0; padding: 13px 14px 15px; overflow-x: auto;
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.62; color: var(--ink-2);
+  font-variant-numeric: tabular-nums; white-space: pre;
+}
+.term .c-dim { color: var(--ink-4); }
+.term .c-ink { color: var(--ink); font-weight: 600; }
+.term .c-ok  { color: var(--pass); }
+.term .c-day { color: var(--daisy-deep); font-weight: 600; }
+.term .c-warn{ color: var(--warn); }
+.term .cur { display: inline-block; width: 7px; height: 13px; background: var(--daisy); vertical-align: -2px; animation: blink 1.15s steps(2) infinite; }
+@keyframes blink { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+
+/* capability row — "also runs as" */
+.also { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 18px; }
+.also .al { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-4); margin-right: 3px; }
+.also .ac {
+  display: inline-flex; align-items: center; gap: 6px; height: 25px; padding: 0 9px;
+  border-radius: 6px; border: 1px solid var(--border); background: transparent;
+  font-family: var(--mono); font-size: 11px; color: var(--ink-3);
+}
+.also .ac svg { width: 12px; height: 12px; }
+
+/* tabular stat strip (rex.inc) */
+.stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  background: var(--surface); margin-top: 40px;
+}
+@media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+.stats .sv { padding: 13px 14px; border-left: 1px solid var(--border); }
+.stats .sv:first-child { border-left: none; }
+@media (max-width: 720px) {
+  .stats .sv:nth-child(odd) { border-left: none; }
+  .stats .sv:nth-child(n+3) { border-top: 1px solid var(--border); }
+}
+.stats .n { font-family: var(--mono); font-size: 20px; font-weight: 600; letter-spacing: -.02em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.stats .l { font-family: var(--mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-4); margin-top: 5px; }

@@ -117,6 +117,10 @@ export default function Page() {
 
   return (
     <>
+      <div className="topbar-ann">
+        Precog measures the page, not your traffic — <b>every coefficient is printed with the result</b>
+        <span className="arw">›</span>
+      </div>
       <header className="nav">
         <span className="wm">
           <span className="mark"><Mark /></span>
@@ -142,56 +146,75 @@ export default function Page() {
         {view === "method" ? <Method /> : (
           <>
             <section className="hero">
-              <button className="ann" onClick={() => setView("method")}>
-                <span className="bdg">Encoder</span>
-                Built to Meta TRIBE v2&apos;s contract
-                <span className="arw">›</span>
-              </button>
-
-              <h1>See the click <em>before</em> you ship the page.</h1>
-              <p className="sub">
-                Precog measures the real pixels and the real copy of a landing page,
-                encodes a predicted cortical response across six networks, and forecasts
-                click-through — printing every coefficient it used.
-              </p>
-
-              <div className="runbar">
-                <div className="urlbar">
-                  <input ref={inputRef} value={url} placeholder="your-saas.com"
-                    onChange={(e) => setUrl(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") run(); }}
-                    spellCheck={false} autoCapitalize="off" autoCorrect="off" />
-                  <button className="pill solid" onClick={run} disabled={busy || !url.trim()}>
-                    {busy ? "Running…" : "Analyse"}
-                  </button>
-                </div>
-
-                <div className="microproof">
-                  <span><i />no account</span>
-                  <span><i />nothing stored</span>
-                  <span><i />every coefficient printed</span>
-                  <span><i />~1 s</span>
-                </div>
-
-                {!cur && !busy && (
-                  <div className="samples">
-                    <span className="sl">Try</span>
-                    {SAMPLES.map((sx) => (
-                      <button className="sm" key={sx} onClick={() => setUrl(sx)}>{sx}</button>
-                    ))}
+              <div className="herogrid">
+                <div>
+                  <div className="badges">
+                    <span className="badge"><span className="k">Encoder</span> Built to Meta TRIBE v2&apos;s contract</span>
+                    <span className="badge"><span className="k">Open</span> Source and method public</span>
                   </div>
-                )}
 
-                {runs.length > 0 && (
-                  <div className="hist">
-                    {runs.map((r) => (
-                      <button key={r.id} className={`hchip ${r.id === active ? "on" : ""}`}
-                        onClick={() => setActive(r.id)}>
-                        {r.host} <b>{r.fc.ctr.toFixed(1)}%</b>
+                  <h1>See the click <em>before</em> you ship the page.</h1>
+                  <p className="sub">
+                    Precog measures the real pixels and the real copy of a landing page,
+                    encodes a predicted cortical response across six networks, and forecasts
+                    click-through.
+                  </p>
+
+                  <div className="runbar">
+                    <div className="urlbar">
+                      <input ref={inputRef} value={url} placeholder="your-saas.com"
+                        onChange={(e) => setUrl(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") run(); }}
+                        spellCheck={false} autoCapitalize="off" autoCorrect="off" />
+                      <button className="pill solid" onClick={run} disabled={busy || !url.trim()}>
+                        {busy ? "Running…" : "Analyse"}
                       </button>
-                    ))}
+                    </div>
+
+                    <div className="microproof">
+                      <span><i />No account</span>
+                      <span><i />No card</span>
+                      <span><i />Nothing stored</span>
+                      <span><i />~1 s</span>
+                    </div>
+
+                    {!cur && !busy && (
+                      <div className="samples">
+                        <span className="sl">Try</span>
+                        {SAMPLES.map((sx) => (
+                          <button className="sm" key={sx} onClick={() => setUrl(sx)}>{sx}</button>
+                        ))}
+                      </div>
+                    )}
+
+                    {runs.length > 0 && (
+                      <div className="hist">
+                        {runs.map((r) => (
+                          <button key={r.id} className={`hchip ${r.id === active ? "on" : ""}`}
+                            onClick={() => setActive(r.id)}>
+                            {r.host} <b>{r.fc.ctr.toFixed(1)}%</b>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
+
+                  <div className="also">
+                    <span className="al">Also runs as</span>
+                    <span className="ac">{I.term} CLI</span>
+                    <span className="ac">{I.src} JSON API</span>
+                    <span className="ac">{I.target} CI gate</span>
+                  </div>
+                </div>
+
+                <Console />
+              </div>
+
+              <div className="stats">
+                <div className="sv"><div className="n">6</div><div className="l">cortical networks</div></div>
+                <div className="sv"><div className="n">12</div><div className="l">measured bands</div></div>
+                <div className="sv"><div className="n">24 s</div><div className="l">at 1 Hz</div></div>
+                <div className="sv"><div className="n">5</div><div className="l">stated priors</div></div>
               </div>
             </section>
 
@@ -231,6 +254,39 @@ export default function Page() {
 }
 
 /* ====================================================================== */
+
+/* Verbatim output of `npm run preflight linear.app`. Not a mockup — this is
+   what the CLI prints, which is the same thing the API returns. */
+function Console() {
+  return (
+    <div className="term">
+      <div className="tb"><i /><i /><i /><span>precog — preflight</span></div>
+      <pre>
+<span className="c-dim">$</span> <span className="c-ink">npx precog preflight linear.app</span>{"\n\n"}
+  https://linear.app/{"\n"}
+  <span className="c-day">6.43%</span>  predicted CTA click-through   <span className="c-dim">[5.58% – 7.39%]</span>   <span className="c-ok">STRONG</span>{"\n\n"}
+  <span className="c-dim">seen</span> 51   <span className="c-dim">intent</span> 73   <span className="c-dim">friction</span> 33   <span className="c-dim">scroll</span> 49%   <span className="c-dim">recall</span> 32%{"\n\n"}
+  visual     <span className="c-dim">█████████···········</span>  48{"\n"}
+  attention  <span className="c-dim">██████████··········</span>  51{"\n"}
+  language   <span className="c-dim">████████████········</span>  62{"\n"}
+  reward     <span className="c-day">███████████████·····</span>  73{"\n"}
+  salience   <span className="c-dim">███████·············</span>  33{"\n"}
+  memory     <span className="c-dim">██████████··········</span>  50{"\n\n"}
+  <span className="c-dim">what to change</span>{"\n"}
+  1. Give the primary action a contrast island   <span className="c-ok">+32%</span>{"\n"}
+  2. State the outcome before the mechanism      <span className="c-ok">+11%</span>{"\n\n"}
+  <span className="c-dim">derivation</span>{"\n"}
+  base     = 0.042              logit = -3.127{"\n"}
+  notice   0.510  x  1.35  -&gt;   0.0135{"\n"}
+  reward   0.730  x  1.10  -&gt;   0.2530{"\n"}
+  friction 0.330  x -1.20  -&gt;   0.2040{"\n"}
+  <span className="c-dim">…</span>{"\n"}
+  z = -2.6832   ctr = invlogit(z) = <span className="c-day">6.43%</span>{"\n\n"}
+<span className="c-dim">$</span> <span className="cur" />
+      </pre>
+    </div>
+  );
+}
 
 /* Real runs, in a ruled grid. This is the proof strip — the equivalent of a
    logo wall, except every number here is reproducible by clicking it. */

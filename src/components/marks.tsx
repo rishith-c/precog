@@ -47,6 +47,11 @@ export const I = {
       <circle cx="8" cy="8" r="1.9" />
     </svg>
   ),
+  term: (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="1.8" y="2.8" width="12.4" height="10.4" rx="1.8" /><path d="M4.6 6.6 6.8 8.4 4.6 10.2M8.6 10.4h3" />
+    </svg>
+  ),
   wrench: (
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round">
       <path d="M10.4 2.2a3.6 3.6 0 0 0-4 5.2L2.6 11.2a1.4 1.4 0 0 0 2 2l3.8-3.8a3.6 3.6 0 0 0 4.6-4.7l-2 2-1.9-.5-.5-1.9 2-2Z" />
