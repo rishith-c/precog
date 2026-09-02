@@ -157,7 +157,7 @@ export const saveRun = (r: StoredRun) => store.put(`runs/${r.userId}/${r.id}`, r
 
 export async function deleteRun(userId: string, runId: string) {
   await store.del(`runs/${userId}/${runId}`);
-  await store.del(`captures/${userId}/${runId}.png`);
+  await store.delBytes(`captures/${userId}/${runId}.png`);
 }
 
 export const putCapture = (userId: string, runId: string, png: Uint8Array) =>
@@ -179,6 +179,13 @@ export async function deleteAccount(u: User) {
   await Promise.all(projects.map((p) => store.del(`projects/${u.id}/${p.id}`)));
   const keys = await store.list(`index/keys/${u.id}`);
   await Promise.all(keys.map((k) => store.del(k)));
+  /* The hash→user entries are keyed by a secret nobody holds any more, so
+     the only way to find this user's is to walk the prefix. Deletion is
+     rare enough that the walk is fine; leaving entries that point at a
+     deleted user is not. */
+  const hashes = await store.list("keys");
+  const owned = await Promise.all(hashes.map(async (k) => ((await store.get<{ userId: string }>(k))?.userId === u.id ? k : null)));
+  await Promise.all(owned.filter((k): k is string => !!k).map((k) => store.del(k)));
   await store.del(emailKey(u.email));
   await store.del(`users/${u.id}`);
 }

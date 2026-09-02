@@ -22,6 +22,9 @@ export interface Store {
       it actually measured, not re-render the page as it looks today */
   putBytes(key: string, bytes: Uint8Array, contentType: string): Promise<void>;
   getBytes(key: string): Promise<Uint8Array | null>;
+  /** del() removes a document (key + .json); bytes live at the bare key and
+      need their own remover, or a deleted run leaves its capture behind. */
+  delBytes(key: string): Promise<void>;
 }
 
 /* ── filesystem ─────────────────────────────────────────────────────── */
@@ -74,6 +77,10 @@ function fsStore(root: string): Store {
       } catch {
         return null;
       }
+    },
+    async delBytes(key) {
+      const path = await p();
+      try { await (await fsp()).unlink(path.join(root, key)); } catch { /* already gone */ }
     },
   };
 }
@@ -143,6 +150,10 @@ function blobStore(): Store {
         return null;
       }
     },
+    async delBytes(key) {
+      const { del } = await sdk();
+      try { await del(key); } catch { /* already gone */ }
+    },
   };
 }
 
@@ -163,7 +174,7 @@ function unconfigured(): Store {
         "the filesystem is not durable on Vercel and silently losing accounts is worse than this error.",
     );
   };
-  return { get: fail, put: fail, del: fail, list: fail, putBytes: fail, getBytes: fail };
+  return { get: fail, put: fail, del: fail, list: fail, putBytes: fail, getBytes: fail, delBytes: fail };
 }
 
 export const store: Store = onVercel
