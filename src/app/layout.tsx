@@ -1,23 +1,24 @@
 import type { Metadata } from "next";
+import { Inter, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
+const sans = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
+const serif = Instrument_Serif({
+  subsets: ["latin"], weight: "400", style: ["normal", "italic"],
+  variable: "--font-serif", display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Precog — neural pre-flight for web pages",
+  metadataBase: new URL("https://precog-tau.vercel.app"),
+  title: "Precog — see the click before you ship the page",
   description:
-    "Run a page past a predicted brain before you run it past users. Measured stimulus features, a TRIBE-shaped cortical encoder, and a click forecast with every coefficient printed.",
+    "Precog measures the real pixels and the real copy of a landing page, encodes a predicted cortical response across six networks, and forecasts click-through with every coefficient printed.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;450;500;600&display=swap"
-        />
-      </head>
+    <html lang="en" className={`${sans.variable} ${mono.variable} ${serif.variable}`}>
       <body>{children}</body>
     </html>
   );
