@@ -1,5 +1,6 @@
 import Form from "@/components/Form";
-import { newApiKey, removeApiKey, setGoal } from "@/app/actions";
+import { newApiKey, removeAccount, removeApiKey, setGoal } from "@/app/actions";
+import { listEvents } from "@/lib/audit";
 import { requireUser } from "@/lib/auth";
 import { listApiKeys, PLANS, quota } from "@/lib/db";
 import { storeKind } from "@/lib/store";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function Settings() {
   const user = await requireUser();
-  const [keys, q] = [await listApiKeys(user.id), quota(user)];
+  const [keys, q, events] = [await listApiKeys(user.id), quota(user), await listEvents(user.id, 30)];
 
   return (
     <main className="page">
@@ -77,6 +78,29 @@ export default async function Settings() {
       </section>
 
       <section className="sect">
+        <div className="sect-h"><h2>Activity</h2></div>
+        {events.length === 0 ? (
+          <p className="page-sub" style={{ fontSize: 13.5 }}>Nothing recorded yet.</p>
+        ) : (
+          <ul className="rows">
+            {events.map((e) => (
+              <li key={e.id}>
+                <div className="row">
+                  <span>
+                    <span className="nm">{e.kind}</span>
+                    <span className="mt">
+                      {new Date(e.at).toLocaleString()}
+                      {Object.keys(e.meta).length ? " · " + Object.entries(e.meta).map(([k, v]) => `${k} ${v}`).join(" · ") : ""}
+                    </span>
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="sect">
         <div className="sect-h"><h2>Where your data lives</h2></div>
         <p className="page-sub" style={{ fontSize: 13.5 }}>
           {storeKind === "blob"
@@ -85,6 +109,21 @@ export default async function Settings() {
               ? "The local filesystem, under .data/ — this is a development machine."
               : "Nothing is persisted: no Blob store is configured on this deployment."}
         </p>
+      </section>
+
+      <section className="sect">
+        <div className="sect-h"><h2>Delete this account</h2></div>
+        <p className="page-sub" style={{ marginTop: 0, marginBottom: 16, fontSize: 13.5 }}>
+          Removes every run, capture, project, key, share and activity entry, then the account. There is no undo.
+        </p>
+        <div style={{ maxWidth: 480 }}>
+          <Form action={removeAccount} submit="Delete everything" pendingLabel="Deleting" wide={false}>
+            <label className="field">
+              <span>Type your email to confirm</span>
+              <input name="confirm" placeholder={user.email} autoComplete="off" />
+            </label>
+          </Form>
+        </div>
       </section>
     </main>
   );

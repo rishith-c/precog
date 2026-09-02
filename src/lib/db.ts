@@ -166,6 +166,23 @@ export const putCapture = (userId: string, runId: string, png: Uint8Array) =>
 export const getCapture = (userId: string, runId: string) =>
   store.getBytes(`captures/${userId}/${runId}.png`);
 
+/* ── the whole account ──────────────────────────────────────────────── */
+
+/** Everything, in dependency order: runs and their captures, projects, key
+    records, shares and their index, the email index, then the user. Idempotent
+    — a half-finished delete can be re-run. */
+export async function deleteAccount(u: User) {
+  const runs = await listRuns(u.id);
+  await Promise.all(runs.map((r) => deleteRun(u.id, r.id)));
+  await Promise.all(runs.map((r) => revokeShare(u.id, r.id)));
+  const projects = await listProjects(u.id);
+  await Promise.all(projects.map((p) => store.del(`projects/${u.id}/${p.id}`)));
+  const keys = await store.list(`index/keys/${u.id}`);
+  await Promise.all(keys.map((k) => store.del(k)));
+  await store.del(emailKey(u.email));
+  await store.del(`users/${u.id}`);
+}
+
 /* ── share links ────────────────────────────────────────────────────── */
 
 export interface Share { token: string; userId: string; runId: string; createdAt: number }

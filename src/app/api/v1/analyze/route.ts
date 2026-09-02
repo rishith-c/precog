@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PRIORS } from "@/lib/forecast";
 import { hostOf, runAnalysis, RunError } from "@/lib/pipeline";
+import { logEvent } from "@/lib/audit";
+import { limit, limitHeaders } from "@/lib/ratelimit";
 import {
   countRun, id, projectForHost, putCapture, quota, saveRun, userForApiKey, type StoredRun,
 } from "@/lib/db";
@@ -20,6 +22,12 @@ export async function GET(req: NextRequest) {
 
   const user = await userForApiKey(key);
   if (!user) return NextResponse.json({ error: "that API key is not valid" }, { status: 401 });
+
+  /* Per-key, on top of the monthly quota: quota is the bill, this is the
+     brake. Sixty a minute is more than the renderer can serve anyway. */
+  const rl = limit(`key:${user.id}`, 60, 60_000);
+  if (!rl.ok)
+    return NextResponse.json({ error: "rate limited — 60 runs a minute per account" }, { status: 429, headers: limitHeaders(rl) });
 
   const q = quota(user);
   if (q.over)
@@ -42,6 +50,7 @@ export async function GET(req: NextRequest) {
     await putCapture(user.id, run.id, png);
     await saveRun(run);
     await countRun(user);
+    await logEvent(user.id, "run", { runId: run.id, host, ctr: Number(fc.ctr.toFixed(2)), via: "api" });
 
     return NextResponse.json({
       id: run.id,

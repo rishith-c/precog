@@ -84,7 +84,9 @@ export default async function Page() {
             <Link href="/docs">API</Link>
             <a href="https://github.com/rishith-c/precog" target="_blank" rel="noreferrer">Source</a>
             <a href="https://arxiv.org/abs/2507.22229" target="_blank" rel="noreferrer">TRIBE paper</a>
-            <span className="sp">TRIBE v2 © Meta Platforms · CC-BY-NC 4.0</span>
+            <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <span className="sp">TRIBE v2 © Meta Platforms · CC-BY-NC 4.0</span>
           </footer>
         </div>
       </main>

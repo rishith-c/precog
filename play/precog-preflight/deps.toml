@@ -1,0 +1,10 @@
+# Exactly what the steps call. Nothing else.
+[[tools]]
+id = "curl"
+command = "curl"
+required = true
+
+[[tools]]
+id = "python3"
+command = "python3"
+required = true
