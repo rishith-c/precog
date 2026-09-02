@@ -117,3 +117,30 @@ request to the page you name.
 - Algonauts 2025 — [insights from the winners](https://arxiv.org/abs/2508.10784)
 
 TRIBE v2 is © Meta Platforms, CC-BY-NC 4.0. Precog does not redistribute weights.
+
+## Production setup
+
+Precog runs with zero environment variables locally (filesystem store under
+`.data/`). On Vercel it refuses to fall back to the filesystem — that would lose
+every account at the next cold start — so accounts are off until a store exists:
+
+```bash
+vercel blob store add precog      # private Blob store; links BLOB_READ_WRITE_TOKEN
+vercel --prod
+```
+
+`GET /api/health` reports which of store, mail and payments are configured.
+Everything else is optional and documented in [`.env.example`](.env.example):
+Resend for welcome mail, Stripe for billing (the pricing page states plainly that
+no processor is connected until it is).
+
+What ships regardless: security headers, per-client and per-key rate limits, an
+append-only audit log under Settings → Activity, account deletion that removes
+everything, `/privacy` and `/terms` written against the code, robots, sitemap,
+OG image, health.
+
+## The Play
+
+[`play/precog-preflight/`](play/precog-preflight/) is the same job as a Rote
+Play: two `process.exec` steps, no credentials, no declared writes. Its README
+has the lint / run / publish commands.
