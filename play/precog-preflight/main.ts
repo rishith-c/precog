@@ -13,6 +13,7 @@
  * provenance:
  *   author: Rishith Chennupati <rishithchennupati@gmail.com>
  * metadata:
+ *   version: 0.1.0
  *   rote_version: 0.78.0
  *   status: released
  *   kind: atomic
