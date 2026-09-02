@@ -9,12 +9,12 @@
  * @rote-frontmatter
  * ---
  * name: precog-preflight
- * description: "Neural pre-flight for a landing page: renders it in real Chrome, measures pixels and copy, forecasts CTA click-through with every coefficient printed, and ranks what to change. Exits non-zero on a weak grade so it can gate a deploy."
+ * description: 'Neural pre-flight for a landing page: renders it in real Chrome, measures pixels and copy, forecasts CTA click-through with every coefficient printed, and ranks what to change. Exits non-zero on a weak grade so it can gate a deploy.'
  * provenance:
  *   author: Rishith Chennupati <rishithchennupati@gmail.com>
  * metadata:
  *   rote_version: 0.78.0
- *   status: draft
+ *   status: released
  *   kind: atomic
  *   flow_type: sequential
  *   execution_model: steps_with_presentation
@@ -32,31 +32,35 @@
  * - name: url
  *   param_type: string
  *   required: true
- *   description: "Landing page to pre-flight; scheme optional (sent as the url query field of GET /api/analyze)"
+ *   description: Landing page to pre-flight; scheme optional (sent as the url query field of GET /api/analyze)
  * - name: host
  *   param_type: string
  *   required: false
- *   default: "https://precog-tau.vercel.app"
- *   description: "Precog origin; change only to point at a self-hosted instance"
+ *   default: https://precog-tau.vercel.app
+ *   description: Precog origin; change only to point at a self-hosted instance
+ * presentation_fixtures:
+ *   analyze: resources/presentation-fixtures/analyze/fixture.yaml
+ *   report: resources/presentation-fixtures/report/fixture.yaml
  * steps:
  *   analyze:
  *     type: process.exec
  *     timeout_ms: 150000
  *     argv:
- *       - curl
- *       - -sS
- *       - --get
- *       - --data-urlencode
- *       - url=$url
- *       - $host/api/analyze
+ *     - curl
+ *     - -sS
+ *     - --get
+ *     - --data-urlencode
+ *     - url=$url
+ *     - $host/api/analyze
  *   report:
  *     type: process.exec
  *     timeout_ms: 20000
- *     depends_on: [analyze]
+ *     depends_on:
+ *     - analyze
  *     argv:
- *       - python3
- *       - "@resource{report.py}"
- *       - "@analyze{$.stdout.text}"
+ *     - python3
+ *     - '@resource{report.py}'
+ *     - '@analyze{$.stdout.text}'
  * ---
  */
 
@@ -77,6 +81,27 @@ type Report = {
   fixes?: { title: string; detail: string; liftPct: number; network: string }[];
   derivation?: string[]; encoder?: string; text?: string;
 };
+
+// Presentation also runs after an effect failure so it can render evidence.
+// A true network fault (DNS, timeout) fails `analyze`, blocks `report`, and
+// lands here: say what happened instead of throwing a stack at the reader.
+if (ctx.run.status === "failed") {
+  // Two ways to fail, and they mean opposite things: the report step exiting 1
+  // is the gate saying the page grades weak (a verdict); the analyze step
+  // failing is a network fault (no verdict at all).
+  const rep = ctx.step(stepName("report")).outcome;
+  const gate = rep.status === "failed" && rep.output.diagnostic?.exit.kind === "code" && rep.output.diagnostic.exit.code === 1;
+  if (gate) {
+    const detail = rep.status === "failed" ? rep.output.message : "";
+    out.human(`Gate failed for ${url}.\n${detail}\n\nThe page was measured and forecast; it grades weak. Apply the top-ranked change and run again.`);
+    out.summary(`precog: ${url} grades weak — gate failed`);
+    out.result({ run_id: ctx.run.run_id, url, available: true, gate_passed: false, grade: "weak", detail });
+  } else {
+    out.human(`Precog could not reach ${url}.\nThe analyze step failed before any measurement was made — a network fault, not a verdict on the page.`);
+    out.summary(`precog: ${url} unreachable — analyze step failed`);
+    out.result({ run_id: ctx.run.run_id, url, available: false, warning: "analyze step failed: network fault" });
+  }
+} else {
 
 // The report step owns the verdict: a weak page is a nonzero exit by design.
 const rep = ctx.requireAvailable(stepName("report"));
@@ -101,4 +126,6 @@ if (r.available === false) {
     gate_passed: !weak, signals: r.signals, peak: r.peak, focus: r.focus,
     fixes: r.fixes, derivation: r.derivation, encoder: r.encoder,
   });
+}
+
 }

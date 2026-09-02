@@ -3,36 +3,7 @@
   "flow_path": "/Users/rishith/.rote/flows/precog-preflight/main.ts",
   "static_checks_passed": true,
   "runtime_checks_passed": true,
-  "violations": [
-    {
-      "code": "RUNTIME_HUMAN_FAILED",
-      "message": "Presentation runtime check failed in human mode without fixture-backed escalation: Deno presentation runner exited with exit code 1: error: Uncaught (in promise) Error: report did not record a process.exec observation\nif (!isProcessExecBody(rep.body)) throw new Error(\"report did not record a process.exec observation\");\n                                        ^\n    at file:///private/var/folders/l_/l17qp1sd6zg0csp8f2fzxvmm0000gn/T/.tmpnMKc1y/main.ts:84:41\n",
-      "line": null,
-      "severity": "information",
-      "is_error": false
-    },
-    {
-      "code": "RUNTIME_SUMMARY_FAILED",
-      "message": "Presentation runtime check failed in summary mode without fixture-backed escalation: Deno presentation runner exited with exit code 1: error: Uncaught (in promise) Error: report did not record a process.exec observation\nif (!isProcessExecBody(rep.body)) throw new Error(\"report did not record a process.exec observation\");\n                                        ^\n    at file:///private/var/folders/l_/l17qp1sd6zg0csp8f2fzxvmm0000gn/T/.tmpfKojLU/main.ts:84:41\n",
-      "line": null,
-      "severity": "information",
-      "is_error": false
-    },
-    {
-      "code": "RUNTIME_JSON_FAILED",
-      "message": "Presentation runtime check failed in json mode without fixture-backed escalation: Deno presentation runner exited with exit code 1: error: Uncaught (in promise) Error: report did not record a process.exec observation\nif (!isProcessExecBody(rep.body)) throw new Error(\"report did not record a process.exec observation\");\n                                        ^\n    at file:///private/var/folders/l_/l17qp1sd6zg0csp8f2fzxvmm0000gn/T/.tmpAFecN7/main.ts:84:41\n",
-      "line": null,
-      "severity": "information",
-      "is_error": false
-    },
-    {
-      "code": "PRESENTATION_FIXTURE_REQUIRED",
-      "message": "Presentation fixture coverage is incomplete: data-bearing steps `analyze`, `report` have no representative fixture; referenced steps `report` have no fixture-backed observation. Run the play once and copy the intended observation from `.rote/presentation/<run-id>/input.json` (`steps.<name>.outcome.output.body` for a single output), then place only representative fixture evidence under `resources/presentation-fixtures/` and declare it in `presentation_fixtures:`. Fixtures require a dedicated `<play>/main.ts` package. See `rote guidance play testing` for the evidence and fixture lifecycle. Runtime failures were not escalated because they may depend on uncovered observations: human: Deno presentation runner exited with exit code 1: error: Uncaught (in promise) Error: report did not record a process.exec observation; summary: Deno presentation runner exited with exit code 1: error: Uncaught (in promise) Error: report did not record a process.exec observation; json: Deno presentation runner exited with exit code 1: error: Uncaught (in promise) Error: report did not record a process.exec observation.",
-      "line": null,
-      "severity": "information",
-      "is_error": false
-    }
-  ],
-  "linted_at": "2026-09-02T05:22:10.376541Z",
+  "violations": [],
+  "linted_at": "2026-09-02T05:32:31.323036Z",
   "rote_version": "0.78.0"
 }

@@ -72,7 +72,10 @@ node scripts/preflight.mjs your-saas.com --json      # machine-readable
 ```
 
 Exit code is `1` when the page grades **weak**, so this can gate a deploy the
-same way a test suite does.
+same way a test suite does. `news.ycombinator.com` is the worked example of the gate
+failing: it has no action target, so it forecasts below base rate and the run fails on
+purpose. An unreachable page is not a failure of the page — it is reported as a
+labelled unknown and the run exits 0.
 
 ## Why a stranger can trust it
 

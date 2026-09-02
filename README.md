@@ -1,7 +1,7 @@
 # Precog
 
 **Neural pre-flight for web pages.** Point it at a landing page. It measures the real
-pixels and the real copy, encodes a predicted cortical response, and forecasts the
+pixels and the real copy, encodes a six-network cortical response, and forecasts the
 click — with every coefficient printed.
 
 ```
@@ -70,32 +70,64 @@ and re-runs the same equation.
 
 ## Validation
 
-Discrimination check across five structurally different pages:
+`npm run validate` runs a six-page reference panel through `/api/analyze` and asserts
+what the literature lets us assert without conversion data of our own — and one
+thing it does not: that the six network curves are six signals. If their 24 s
+timecourses are one shape scaled six ways, the "six networks" is decoration.
+Pairwise Pearson r across networks must not all sit near 1.
 
-| page | CTR | vis | att | lang | rew | sal | mem |
-|---|---|---|---|---|---|---|---|
-| `linear.app` | 6.43% | 48 | 51 | 62 | 73 | 33 | 50 |
-| `vercel.com` | 4.35% | 39 | 42 | 33 | 36 | 32 | 34 |
-| `stripe.com` | 4.33% | 60 | 41 | 64 | 57 | 41 | 36 |
-| `cursor.com` | 3.53% | 33 | 27 | 40 | 64 | 53 | 31 |
-| `news.ycombinator.com` | 3.11% | 41 | 31 | 36 | 10 | 22 | 28 |
+| page | CTR | vis | att | lang | rew | sal | mem | focus |
+|---|---|---|---|---|---|---|---|---|
+| `apple.com` | 4.66% | 58 | 28 | 48 | 44 | 36 | 78 | 0.40 |
+| `vercel.com` | 4.58% | 35 | 29 | 18 | 31 | 32 | 47 | 0.59 |
+| `linear.app` | 4.17% | 50 | 26 | 41 | 47 | 32 | 46 | 0.37 |
+| `stripe.com` | 4.01% | 52 | 22 | 30 | 48 | 33 | 47 | 0.23 |
+| `cursor.com` | 3.29% | 31 | 18 | 33 | 37 | 33 | 37 | 0.19 |
+| `news.ycombinator.com` | 2.36% · weak | 33 | 25 | 24 | 6 | 31 | 26 | 0.34 |
 
-The model separates them for the right reasons. HN has no marketing copy at all
-(reward 10). Cursor has strong value cues (reward 64) but pays for them in
-friction (salience 53 — "Request a demo", "Contact sales"). Linear wins on
-attention held in a sparse layout rather than on volume.
+35/35 assertions pass (2026-09-02). Median pairwise r between network curves is
+0.68–0.84 per page. HN has no marketing copy (reward 6) and **no action target at
+all** — a page with nothing to click must not forecast base-rate clicks, so it
+grades weak. Apple's photography and offers register (reward 44, above the panel
+median) where the previous lexicon-only reward gave it 30.
+
+### Six mechanisms, not one envelope
+
+An earlier build drew all six networks from one temporal envelope and scaled it —
+the sparklines were visibly the same curve. Each network now has its own mechanism:
+**visual** adapts to repetition; **attention** is saliency concentration under
+divisive competition with a top-and-left reading prior, depleting with scroll;
+**language** is a leaky integrator of text in view; **reward** is an integrator
+gated by attention, because a reader cannot value what they never fixated;
+**salience** (insula) is phasic, firing on change toward friction; **memory** is a
+slow leaky integrator of novelty × reward. Then the haemodynamic kernel.
+
+### Is TRIBE enough?
+
+No. TRIBE predicts fMRI, not behaviour, and the published neural-to-outcome effect
+sizes are modest. It was trained on passive film viewing at 1 Hz; a page is scanned
+by someone with a goal at saccade speed. So the attention network here is not
+fMRI-shaped: it is a bottom-up saliency map in the Itti–Koch–Niebur form
+(centre–surround on intensity, colour opponency, orientation), a page-level focus
+measured over the first viewport with the navigation strip excluded (fold studies;
+banner blindness), and a noticeability gate on whether an action target exists. That
+is the part of the model with the best-replicated grounding, and it is the part that
+decides whether the action is seen at all.
+
+### Calibration
+
+The five logit priors are centred on the medians of the reference panel above, and
+the centres are printed in every derivation. A page at the panel median on every
+term forecasts the base rate; the panel is the scale. Nothing is fitted to private
+data.
 
 ### The capture has to be real
 
 An earlier build rendered pages through a lightweight screenshot service that
-returned **nav-only frames** on JS-heavy sites — `linear.app` came back 99.6%
-black. Every statistic downstream was noise, and the tool reported a confident
-number anyway. That is the worst failure mode an instrument can have.
-
-Two fixes: captures now go through real headless Chrome waiting on
-`networkidle2`, and `captureQuality()` in [`bandstats.ts`](src/lib/bandstats.ts)
-**refuses to forecast** when fewer than a third of bands carry visual structure.
-A nav-only frame scores `0.08` and is rejected rather than analysed.
+returned nav-only frames on JS-heavy sites — `linear.app` came back 99.6% black —
+and reported a confident number anyway. Captures now go through real headless
+Chrome, and `captureQuality()` refuses to forecast when under a third of bands carry
+visual structure.
 
 ## Run it
 
