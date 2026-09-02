@@ -157,7 +157,12 @@ Precog runs with zero environment variables locally (filesystem store under
 every account at the next cold start — so accounts are off until a store exists:
 
 ```bash
-vercel blob store add precog      # private Blob store; links BLOB_READ_WRITE_TOKEN
+# a PRIVATE Blob store — the CLI's `blob store add` creates a public one, which the
+# driver refuses because user records hold password and key hashes
+curl -X POST "https://api.vercel.com/v1/storage/stores/blob?teamId=$TEAM" -H "Authorization: Bearer $TOKEN" \
+  -d '{"name":"precog-private","region":"iad1","access":"private"}'
+# …then connect it to the project (Dashboard → Storage → Connect), and
+openssl rand -hex 32 | vercel env add PRECOG_SECRET production   # one session key for every instance
 vercel --prod
 ```
 
