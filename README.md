@@ -85,7 +85,7 @@ Pairwise Pearson r across networks must not all sit near 1.
 | `cursor.com` | 3.29% | 31 | 18 | 33 | 37 | 33 | 37 | 0.19 |
 | `news.ycombinator.com` | 2.36% · weak | 33 | 25 | 24 | 6 | 31 | 26 | 0.34 |
 
-35/35 assertions pass (2026-09-02). Median pairwise r between network curves is
+35/35 assertions pass (2026-09-02); each assertion's grounding is in [`tests/EVIDENCE.md`](tests/EVIDENCE.md). Median pairwise r between network curves is
 0.68–0.84 per page. HN has no marketing copy (reward 6) and **no action target at
 all** — a page with nothing to click must not forecast base-rate clicks, so it
 grades weak. Apple's photography and offers register (reward 44, above the panel
