@@ -1,0 +1,9 @@
+{
+  "flow_name": "play/ctr-watch/main.ts",
+  "flow_path": "play/ctr-watch/main.ts",
+  "static_checks_passed": true,
+  "runtime_checks_passed": true,
+  "violations": [],
+  "linted_at": "2026-09-06T01:54:27.502863Z",
+  "rote_version": "0.80.0"
+}

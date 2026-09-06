@@ -176,12 +176,24 @@ append-only audit log under Settings → Activity, account deletion that removes
 everything, `/privacy` and `/terms` written against the code, robots, sitemap,
 OG image, health.
 
-## The Play
+## The Plays
 
-[`play/precog-preflight/`](play/precog-preflight/) is the same job as a Rote
-Play: two `process.exec` steps, no credentials, no declared writes. Published
-public as `rishith-c/precog-preflight@0.1.1`:
+Two published Rote Plays, both public, both `process.exec` only and neither
+asking for a credential.
+
+[`play/precog-preflight/`](play/precog-preflight/) answers the one-shot
+question — will anyone click this page — and exits non-zero on a weak grade so
+it can gate a deploy:
 
 ```bash
 rote play run https://play.modiqo.ai/rishith-c/precog-preflight@0.1.1 url=your-saas.com
+```
+
+[`play/ctr-watch/`](play/ctr-watch/) answers the recurring one. It watches your
+page and your competitors', keeps one small JSON baseline per page under
+`~/.rote/ctr-watch`, and reports the *move* rather than the number — silent when
+nothing changed, non-zero when a page drops past your threshold:
+
+```bash
+rote play run https://play.modiqo.ai/rishith-c/ctr-watch@0.1.1 pages=your-saas.com,competitor.com
 ```

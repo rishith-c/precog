@@ -72,6 +72,20 @@ npx --yes . preflight https://your-saas.com          # from the repo
 node scripts/preflight.mjs your-saas.com --json      # machine-readable
 ```
 
+## The recurring invocation
+
+A one-shot answer is only useful when someone remembers to ask. `ctr-watch`
+turns the same forecast into a watch: it stores a baseline per page and reports
+the movement, so a scheduled run stays quiet until a page actually gets worse.
+
+```bash
+rote play run https://play.modiqo.ai/rishith-c/ctr-watch@0.1.1 pages=your-saas.com,competitor.com
+```
+
+Exit code is `1` when a page falls past `alert_drop` (0.30 points by default),
+which is the signal a cron or `play recurring schedule` is read by. A page the
+renderer cannot measure is reported as unmeasured and does not fail the run.
+
 Exit code is `1` when the page grades **weak**, so this can gate a deploy the
 same way a test suite does. `news.ycombinator.com` is the worked example of the gate
 failing: it has no action target, so it forecasts below base rate and the run fails on
