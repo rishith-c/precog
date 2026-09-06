@@ -10,16 +10,70 @@
  * ---
  * name: precog-preflight
  * description: 'Neural pre-flight for a landing page: renders it in real Chrome, measures pixels and copy, forecasts CTA click-through with every coefficient printed, and ranks what to change. Exits non-zero on a weak grade so it can gate a deploy.'
+ * source: https://github.com/rishith-c/precog
+ * tags:
+ * - precog
+ * - landing-page
+ * - ctr
+ * - conversion
+ * - neuroscience
+ * - pre-flight
+ * - saas
+ * - read-only
+ * - no-credentials
+ * discoverability:
+ *   tags:
+ *   - precog
+ *   - landing-page
+ *   - ctr
+ *   - conversion
+ *   - neuroscience
+ *   - pre-flight
+ *   - saas
+ *   - read-only
+ *   - no-credentials
  * provenance:
  *   author: Rishith Chennupati <rishithchennupati@gmail.com>
  * metadata:
- *   version: 0.1.0
+ *   version: 0.1.1
  *   rote_version: 0.78.0
  *   status: released
  *   kind: atomic
  *   flow_type: sequential
  *   execution_model: steps_with_presentation
  *   format: typescript
+ *   contract:
+ *     atomic: true
+ *     composable: true
+ *     input:
+ *       type: none
+ *       parameters:
+ *       - url
+ *       - host
+ *     output:
+ *       format: json
+ *       destination: stdout
+ *       fields:
+ *       - ok
+ *       - available
+ *       - warning
+ *       - url
+ *       - ctr
+ *       - interval
+ *       - grade
+ *       - signals
+ *       - peak
+ *       - focus
+ *       - fixes
+ *       - derivation
+ *       - encoder
+ *       - text
+ *     effects:
+ *       sends_network_requests: true
+ *       reads_filesystem: false
+ *       writes_files: false
+ *       requires_credentials: false
+ *       uses_sudo: false
  *   requires_endpoints: []
  *   requires_sessions: false
  *   discoverability:

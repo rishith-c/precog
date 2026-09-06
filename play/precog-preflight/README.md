@@ -11,9 +11,9 @@ not done.
 
 ## Published
 
-Public, in the Community namespace: `https://play.modiqo.ai/rishith-c/precog-preflight@0.1.0`
+Public, in the Community namespace: `https://play.modiqo.ai/rishith-c/precog-preflight@0.1.1`
 
-    rote play run https://play.modiqo.ai/rishith-c/precog-preflight@0.1.0 url=your-saas.com
+    rote play run https://play.modiqo.ai/rishith-c/precog-preflight@0.1.1 url=your-saas.com
 
 ## Verify, then publish (needs `rote`, signed in)
 

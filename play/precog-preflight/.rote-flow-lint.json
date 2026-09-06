@@ -1,9 +1,9 @@
 {
-  "flow_name": "precog-preflight",
-  "flow_path": "/Users/rishith/.rote/flows/precog-preflight/main.ts",
+  "flow_name": "play/precog-preflight/main.ts",
+  "flow_path": "play/precog-preflight/main.ts",
   "static_checks_passed": true,
   "runtime_checks_passed": true,
   "violations": [],
-  "linted_at": "2026-09-02T05:33:55.424032Z",
-  "rote_version": "0.78.0"
+  "linted_at": "2026-09-06T00:44:14.675551Z",
+  "rote_version": "0.80.0"
 }
